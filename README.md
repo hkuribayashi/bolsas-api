@@ -1,4 +1,4 @@
-# 🧩 iSACI – Sistema de Bolsas (API)
+# Backend Sistema de Bolsas (API)
 
 API REST desenvolvida em **Spring Boot 3**, projetada para o gerenciamento de **bolsas e incentivos institucionais** vinculados a pessoas e projetos.  
 O sistema permite cadastrar **pessoas**, **projetos**, e **participações** (relação entre ambos), além de controlar dados bancários, endereços e perfis de acesso.
@@ -200,9 +200,3 @@ docker-compose up --build
 > ```bash
 > docker logs -f bolsas-api
 > ```
-
-## Autores
-
-- **Prof. Hugo Kuribayashi** — Universidade Federal do Sul e Sudeste do Pará
-
----
