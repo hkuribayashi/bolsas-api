@@ -1,0 +1,49 @@
+package org.isaci.bolsas_api.security;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.isaci.bolsas_api.config.SecurityProperties;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import java.io.IOException;
+
+@Component
+@RequiredArgsConstructor
+public class ApiKeyAuthFilter extends OncePerRequestFilter {
+
+    private final SecurityProperties securityProperties;
+    private static final String HEADER_NAME = "X-API-KEY";
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
+
+        String path = request.getRequestURI();
+        String requestApiKey = request.getHeader(HEADER_NAME);
+
+        if (path.startsWith("/admin/")) {
+            String configuredKey = securityProperties.getKey();
+
+            if (requestApiKey == null || !requestApiKey.equals(configuredKey)) {
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                response.setContentType("application/json");
+                response.getWriter().write("""
+                        {
+                          "error": "Unauthorized",
+                          "message": "Missing or invalid API key"
+                        }
+                        """);
+                return;
+            }
+        }
+
+        filterChain.doFilter(request, response);
+    }
+}
