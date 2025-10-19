@@ -31,4 +31,10 @@ public class ParticipationDTO {
     @DecimalMin(value = "0.0", inclusive = false, message = "O valor da bolsa deve ser positivo")
     @Digits(integer = 10, fraction = 2, message = "O valor da bolsa deve ter no máximo 10 dígitos e 2 casas decimais")
     private BigDecimal grantAmount;
+
+    @NotNull
+    private String description;
+
+    @NotNull
+    private Integer quantity;
 }

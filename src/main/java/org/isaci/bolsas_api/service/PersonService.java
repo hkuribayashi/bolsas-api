@@ -40,7 +40,7 @@ public class PersonService {
 
         if (personDTO.getBankData() != null) {
             BankDataModel bankData = modelMapper.map(personDTO.getBankData(), BankDataModel.class);
-            person.setBank(bankData);
+            person.setBankData(bankData);
         }
 
         return personRepository.save(person);

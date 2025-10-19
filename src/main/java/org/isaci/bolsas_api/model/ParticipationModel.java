@@ -36,4 +36,10 @@ public class ParticipationModel {
 
     @Column(precision = 10, scale = 2)
     private BigDecimal grantAmount;
+
+    @Column(nullable = false)
+    private Integer quantity;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String description;
 }

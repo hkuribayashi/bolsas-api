@@ -1,5 +1,6 @@
 package org.isaci.bolsas_api.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.isaci.bolsas_api.enums.PixKey;
@@ -35,7 +36,8 @@ public class BankDataModel {
     @Enumerated(EnumType.STRING)
     private PixKey pixKeyType;
 
-    @OneToOne(mappedBy = "bank", optional = false)
+    @OneToOne(mappedBy = "bankData", optional = false)
+    @JsonBackReference
     private PersonModel person;
 
 }

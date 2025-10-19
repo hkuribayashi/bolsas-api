@@ -1,5 +1,6 @@
 package org.isaci.bolsas_api.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -35,5 +36,6 @@ public class AddressModel {
     private String complement;
 
     @OneToOne(mappedBy = "address", optional = false)
+    @JsonBackReference
     private PersonModel person;
 }

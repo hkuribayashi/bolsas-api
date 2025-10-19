@@ -1,5 +1,6 @@
 package org.isaci.bolsas_api.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -44,11 +45,13 @@ public class PersonModel {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")
+    @JsonManagedReference
     private AddressModel address;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "bank_id")
-    private BankDataModel bank;
+    @JsonManagedReference
+    private BankDataModel bankData;
 
     @OneToMany(mappedBy = "person")
     private List<ParticipationModel> participations;

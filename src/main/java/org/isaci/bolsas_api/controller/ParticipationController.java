@@ -3,7 +3,7 @@ package org.isaci.bolsas_api.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.isaci.bolsas_api.dtos.ParticipationDTO;
-import org.isaci.bolsas_api.model.ParticipationModel;
+import org.isaci.bolsas_api.dtos.ParticipationResponseDTO;
 import org.isaci.bolsas_api.service.ParticipationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,49 +22,33 @@ public class ParticipationController {
 
     private final ParticipationService participationService;
 
-    /**
-     * Cria uma participação.
-     */
     @PostMapping
-    public ResponseEntity<ParticipationModel> createParticipation(@RequestBody @Valid ParticipationDTO participationDTO) {
-        ParticipationModel savedParticipation = participationService.save(participationDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedParticipation);
+    public ResponseEntity<ParticipationResponseDTO> create(@RequestBody @Valid ParticipationDTO dto) {
+        ParticipationResponseDTO created = participationService.save(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    /**
-     * Retorna uma participação pelo ‘ID’.
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<ParticipationModel> getParticipationById(@PathVariable UUID id) {
-        ParticipationModel participation = participationService.findById(id);
-        return ResponseEntity.ok(participation);
-    }
-
-    /**
-     * Lista todas as participações paginadas.
-     */
-    @GetMapping
-    public ResponseEntity<Page<ParticipationModel>> getAllParticipations(
-            @PageableDefault(sort = "startDate", direction = Sort.Direction.ASC) Pageable pageable) {
-        Page<ParticipationModel> page = participationService.findAll(pageable);
-        return ResponseEntity.ok(page);
-    }
-
-    /**
-     * Atualiza uma participação existente.
-     */
     @PutMapping("/{id}")
-    public ResponseEntity<ParticipationModel> updateParticipation(@PathVariable UUID id,
-                                                             @RequestBody @Valid ParticipationDTO participationDTO) {
-        ParticipationModel updatedParticipation = participationService.update(id, participationDTO);
-        return ResponseEntity.ok(updatedParticipation);
+    public ResponseEntity<ParticipationResponseDTO> update(@PathVariable UUID id, @RequestBody @Valid ParticipationDTO dto) {
+        ParticipationResponseDTO updated = participationService.update(id, dto);
+        return ResponseEntity.ok(updated);
     }
 
-    /**
-     * Exclui uma participação pelo ‘ID’.
-     */
+    @GetMapping("/{id}")
+    public ResponseEntity<ParticipationResponseDTO> getById(@PathVariable UUID id) {
+        ParticipationResponseDTO found = participationService.findById(id);
+        return ResponseEntity.ok(found);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<ParticipationResponseDTO>> getAll(
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+        Page<ParticipationResponseDTO> participations = participationService.findAll(pageable);
+        return ResponseEntity.ok(participations);
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteParticipation(@PathVariable UUID id) {
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
         participationService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
