@@ -1,25 +1,15 @@
 package org.isaci.bolsas_api.dtos;
 
 import lombok.Data;
-import jakarta.validation.constraints.NotNull;
-
 import java.util.Date;
+import java.util.UUID;
 
 @Data
-public class ProjectDTO {
-
-    @NotNull
+public class ProjectResponseDTO {
+    private UUID id;
     private String name;
-
-    @NotNull
     private String description;
-
-    @NotNull
     private Date startDate;
-
     private Date endDate;
-
-    @NotNull
     private Boolean isActive;
-
 }

@@ -3,6 +3,7 @@ package org.isaci.bolsas_api.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.isaci.bolsas_api.dtos.PersonDTO;
+import org.isaci.bolsas_api.dtos.PersonResponseDTO;
 import org.isaci.bolsas_api.exceptions.ResourceNotFoundException;
 import org.isaci.bolsas_api.model.AddressModel;
 import org.isaci.bolsas_api.model.BankDataModel;
@@ -26,13 +27,13 @@ public class PersonService {
      * Cria e salva uma nova pessoa com endereço e dados bancários.
      */
     @Transactional
-    public PersonModel save(PersonDTO personDTO) {
+    public PersonResponseDTO save(PersonDTO personDTO) {
         PersonModel person = modelMapper.map(personDTO, PersonModel.class);
-
-        return getPerson(personDTO, person);
+        PersonModel saved = prepareAndSave(personDTO, person);
+        return modelMapper.map(saved, PersonResponseDTO.class);
     }
 
-    private PersonModel getPerson(PersonDTO personDTO, PersonModel person) {
+    private PersonModel prepareAndSave(PersonDTO personDTO, PersonModel person) {
         if (personDTO.getAddress() != null) {
             AddressModel address = modelMapper.map(personDTO.getAddress(), AddressModel.class);
             person.setAddress(address);
@@ -50,28 +51,30 @@ public class PersonService {
      * Atualiza os dados de uma pessoa existente.
      */
     @Transactional
-    public PersonModel update(UUID id, PersonDTO personDTO) {
-        PersonModel existingPerson = personRepository.findById(id)
+    public PersonResponseDTO update(UUID id, PersonDTO personDTO) {
+        PersonModel existing = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + id));
 
-        modelMapper.map(personDTO, existingPerson);
-
-        return getPerson(personDTO, existingPerson);
+        modelMapper.map(personDTO, existing);
+        PersonModel updated = prepareAndSave(personDTO, existing);
+        return modelMapper.map(updated, PersonResponseDTO.class);
     }
 
     /**
      * Busca uma pessoa pelo ID.
      */
-    public PersonModel findById(UUID id) {
-        return personRepository.findById(id)
+    public PersonResponseDTO findById(UUID id) {
+        PersonModel person = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + id));
+        return modelMapper.map(person, PersonResponseDTO.class);
     }
 
     /**
      * Retorna uma lista paginada de pessoas.
      */
-    public Page<PersonModel> findAll(Pageable pageable) {
-        return personRepository.findAll(pageable);
+    public Page<PersonResponseDTO> findAll(Pageable pageable) {
+        return personRepository.findAll(pageable)
+                .map(person -> modelMapper.map(person, PersonResponseDTO.class));
     }
 
     /**

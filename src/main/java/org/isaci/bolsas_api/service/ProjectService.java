@@ -3,6 +3,7 @@ package org.isaci.bolsas_api.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.isaci.bolsas_api.dtos.ProjectDTO;
+import org.isaci.bolsas_api.dtos.ProjectResponseDTO;
 import org.isaci.bolsas_api.exceptions.ResourceNotFoundException;
 import org.isaci.bolsas_api.model.ProjectModel;
 import org.isaci.bolsas_api.repository.ProjectRepository;
@@ -23,40 +24,41 @@ public class ProjectService {
     /**
      * Cria e salva um novo projeto.
      */
-    public ProjectModel save(ProjectDTO projectDTO) {
+    public ProjectResponseDTO save(ProjectDTO projectDTO) {
         ProjectModel project = modelMapper.map(projectDTO, ProjectModel.class);
-        return projectRepository.save(project);
+        ProjectModel saved = projectRepository.save(project);
+        return modelMapper.map(saved, ProjectResponseDTO.class);
     }
 
     /**
      * Atualiza um projeto existente pelo ID.
-     * Lança exceção se o projeto não for encontrado.
      */
     @Transactional
-    public ProjectModel update(UUID id, ProjectDTO projectDTO) {
-        ProjectModel existingProject = projectRepository.findById(id)
+    public ProjectResponseDTO update(UUID id, ProjectDTO projectDTO) {
+        ProjectModel existing = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
 
-        // Atualiza apenas os campos modificáveis
-        modelMapper.map(projectDTO, existingProject);
+        modelMapper.map(projectDTO, existing);
+        ProjectModel updated = projectRepository.save(existing);
 
-        return projectRepository.save(existingProject);
+        return modelMapper.map(updated, ProjectResponseDTO.class);
     }
 
     /**
-     * Busca um projeto pelo ID.
-     * Lança exceção se não encontrado.
+     * Busca um projeto pelo ID e retorna como DTO.
      */
-    public ProjectModel findById(UUID id) {
-        return projectRepository.findById(id)
+    public ProjectResponseDTO findById(UUID id) {
+        ProjectModel project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
+        return modelMapper.map(project, ProjectResponseDTO.class);
     }
 
     /**
-     * Retorna uma página de projetos.
+     * Retorna uma página de projetos convertidos em DTO.
      */
-    public Page<ProjectModel> findAll(Pageable pageable) {
-        return projectRepository.findAll(pageable);
+    public Page<ProjectResponseDTO> findAll(Pageable pageable) {
+        return projectRepository.findAll(pageable)
+                .map(project -> modelMapper.map(project, ProjectResponseDTO.class));
     }
 
     /**

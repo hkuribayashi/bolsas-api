@@ -1,5 +1,6 @@
 package org.isaci.bolsas_api.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.isaci.bolsas_api.enums.ProjectRole;
@@ -22,12 +23,12 @@ public class ParticipationModel {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "project_id", nullable = false)
+    @JsonBackReference
     private ProjectModel project;
 
     @Column(nullable = false)
     private LocalDate startDate;
 
-    @Column(nullable = false)
     private LocalDate endDate;
 
     @Column(nullable = false)

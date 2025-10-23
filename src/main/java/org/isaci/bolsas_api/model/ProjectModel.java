@@ -1,5 +1,6 @@
 package org.isaci.bolsas_api.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -24,9 +25,13 @@ public class ProjectModel {
     @Column(nullable = false)
     private Date startDate;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Date endDate;
 
-    @OneToMany(mappedBy = "project")
+    @Column(nullable = false)
+    private Boolean isActive;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<ParticipationModel> participations;
 }

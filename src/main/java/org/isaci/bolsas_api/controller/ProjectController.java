@@ -3,7 +3,7 @@ package org.isaci.bolsas_api.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.isaci.bolsas_api.dtos.ProjectDTO;
-import org.isaci.bolsas_api.model.ProjectModel;
+import org.isaci.bolsas_api.dtos.ProjectResponseDTO;
 import org.isaci.bolsas_api.service.ProjectService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,27 +26,27 @@ public class ProjectController {
      * Cria um novo projeto.
      */
     @PostMapping
-    public ResponseEntity<ProjectModel> createProject(@RequestBody @Valid ProjectDTO projectDTO) {
-        ProjectModel savedProject = projectService.save(projectDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedProject);
+    public ResponseEntity<ProjectResponseDTO> createProject(@RequestBody @Valid ProjectDTO projectDTO) {
+        ProjectResponseDTO saved = projectService.save(projectDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     /**
      * Retorna um projeto pelo ID.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectModel> getProjectById(@PathVariable UUID id) {
-        ProjectModel project = projectService.findById(id);
+    public ResponseEntity<ProjectResponseDTO> getProjectById(@PathVariable UUID id) {
+        ProjectResponseDTO project = projectService.findById(id);
         return ResponseEntity.ok(project);
     }
 
     /**
-     * Lista todos os projetos paginados.
+     * Lista todos os projetos paginados com JSON estável.
      */
     @GetMapping
-    public ResponseEntity<Page<ProjectModel>> getAllProjects(
+    public ResponseEntity<Page<ProjectResponseDTO>> getAllProjects(
             @PageableDefault(size = 5, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
-        Page<ProjectModel> page = projectService.findAll(pageable);
+        Page<ProjectResponseDTO> page = projectService.findAll(pageable);
         return ResponseEntity.ok(page);
     }
 
@@ -54,10 +54,10 @@ public class ProjectController {
      * Atualiza um projeto existente.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<ProjectModel> updateProject(@PathVariable UUID id,
-                                                      @RequestBody @Valid ProjectDTO projectDTO) {
-        ProjectModel updatedProject = projectService.update(id, projectDTO);
-        return ResponseEntity.ok(updatedProject);
+    public ResponseEntity<ProjectResponseDTO> updateProject(@PathVariable UUID id,
+                                                            @RequestBody @Valid ProjectDTO projectDTO) {
+        ProjectResponseDTO updated = projectService.update(id, projectDTO);
+        return ResponseEntity.ok(updated);
     }
 
     /**
