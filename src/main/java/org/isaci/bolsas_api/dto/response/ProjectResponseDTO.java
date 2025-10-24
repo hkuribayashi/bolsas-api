@@ -1,4 +1,4 @@
-package org.isaci.bolsas_api.dtos;
+package org.isaci.bolsas_api.dto.response;
 
 import lombok.Data;
 import java.util.Date;

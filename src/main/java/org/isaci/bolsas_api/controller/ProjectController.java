@@ -2,8 +2,8 @@ package org.isaci.bolsas_api.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.isaci.bolsas_api.dtos.ProjectDTO;
-import org.isaci.bolsas_api.dtos.ProjectResponseDTO;
+import org.isaci.bolsas_api.dto.request.ProjectRequestDTO;
+import org.isaci.bolsas_api.dto.response.ProjectResponseDTO;
 import org.isaci.bolsas_api.service.ProjectService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +26,7 @@ public class ProjectController {
      * Cria um novo projeto.
      */
     @PostMapping
-    public ResponseEntity<ProjectResponseDTO> createProject(@RequestBody @Valid ProjectDTO projectDTO) {
+    public ResponseEntity<ProjectResponseDTO> createProject(@RequestBody @Valid ProjectRequestDTO projectDTO) {
         ProjectResponseDTO saved = projectService.save(projectDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -55,7 +55,7 @@ public class ProjectController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<ProjectResponseDTO> updateProject(@PathVariable UUID id,
-                                                            @RequestBody @Valid ProjectDTO projectDTO) {
+                                                            @RequestBody @Valid ProjectRequestDTO projectDTO) {
         ProjectResponseDTO updated = projectService.update(id, projectDTO);
         return ResponseEntity.ok(updated);
     }

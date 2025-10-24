@@ -2,8 +2,8 @@ package org.isaci.bolsas_api.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.isaci.bolsas_api.dtos.ParticipationDTO;
-import org.isaci.bolsas_api.dtos.ParticipationResponseDTO;
+import org.isaci.bolsas_api.dto.request.ParticipationRequestDTO;
+import org.isaci.bolsas_api.dto.response.ParticipationResponseDTO;
 import org.isaci.bolsas_api.service.ParticipationService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,13 +23,13 @@ public class ParticipationController {
     private final ParticipationService participationService;
 
     @PostMapping
-    public ResponseEntity<ParticipationResponseDTO> create(@RequestBody @Valid ParticipationDTO dto) {
+    public ResponseEntity<ParticipationResponseDTO> create(@RequestBody @Valid ParticipationRequestDTO dto) {
         ParticipationResponseDTO created = participationService.save(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ParticipationResponseDTO> update(@PathVariable UUID id, @RequestBody @Valid ParticipationDTO dto) {
+    public ResponseEntity<ParticipationResponseDTO> update(@PathVariable UUID id, @RequestBody @Valid ParticipationRequestDTO dto) {
         ParticipationResponseDTO updated = participationService.update(id, dto);
         return ResponseEntity.ok(updated);
     }

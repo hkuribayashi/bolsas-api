@@ -35,6 +35,9 @@ public class AddressModel {
     @Column(nullable = true)
     private String complement;
 
+    @Column(nullable = false)
+    private String neighborhood;
+
     @OneToOne(mappedBy = "address", optional = false)
     @JsonBackReference
     private PersonModel person;

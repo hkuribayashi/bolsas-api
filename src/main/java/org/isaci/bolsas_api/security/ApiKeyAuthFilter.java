@@ -26,10 +26,29 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
-        String requestApiKey = request.getHeader(HEADER_NAME);
 
+        // ✅ Ignora requisições de preflight (CORS)
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpStatus.OK.value());
+            return;
+        }
+
+        // ✅ Só valida a API key em rotas protegidas
         if (path.startsWith("/admin/")) {
+            String requestApiKey = request.getHeader(HEADER_NAME);
             String configuredKey = securityProperties.getKey();
+
+            if (configuredKey == null || configuredKey.isBlank()) {
+                response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+                response.setContentType("application/json");
+                response.getWriter().write("""
+                        {
+                          "error": "ConfigurationError",
+                          "message": "Server API key not configured."
+                        }
+                        """);
+                return;
+            }
 
             if (requestApiKey == null || !requestApiKey.equals(configuredKey)) {
                 response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -44,6 +63,13 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             }
         }
 
+        // ✅ Continua o processamento normal
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        // 🔹 Também evita rodar o filtro para preflights
+        return "OPTIONS".equalsIgnoreCase(request.getMethod());
     }
 }

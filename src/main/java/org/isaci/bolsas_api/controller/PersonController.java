@@ -2,8 +2,8 @@ package org.isaci.bolsas_api.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.isaci.bolsas_api.dtos.PersonDTO;
-import org.isaci.bolsas_api.dtos.PersonResponseDTO;
+import org.isaci.bolsas_api.dto.request.PersonRequestDTO;
+import org.isaci.bolsas_api.dto.response.PersonResponseDTO;
 import org.isaci.bolsas_api.service.PersonService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,7 +26,7 @@ public class PersonController {
      * Cria uma nova pessoa.
      */
     @PostMapping
-    public ResponseEntity<PersonResponseDTO> createPerson(@RequestBody @Valid PersonDTO personDTO) {
+    public ResponseEntity<PersonResponseDTO> createPerson(@RequestBody @Valid PersonRequestDTO personDTO) {
         PersonResponseDTO saved = personService.save(personDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -55,7 +55,7 @@ public class PersonController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<PersonResponseDTO> updatePerson(@PathVariable UUID id,
-                                                          @RequestBody @Valid PersonDTO personDTO) {
+                                                          @RequestBody @Valid PersonRequestDTO personDTO) {
         PersonResponseDTO updated = personService.update(id, personDTO);
         return ResponseEntity.ok(updated);
     }

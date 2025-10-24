@@ -1,23 +1,45 @@
-package org.isaci.bolsas_api.dtos;
+package org.isaci.bolsas_api.dto.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.isaci.bolsas_api.enums.AcademicTitle;
 import org.isaci.bolsas_api.enums.MaritalStatus;
 
 import java.util.Date;
-import java.util.UUID;
 
 @Data
-public class PersonResponseDTO {
+public class PersonRequestDTO {
 
-    private UUID id;
+    @NotNull
     private String fullName;
+
+    @NotNull
     private String cpf;
+
+    @NotNull
     private String email;
+
+    @NotNull
     private Date birthDate;
+
+    @NotNull
     private String phone;
+
+    @NotNull
     private MaritalStatus maritalStatus;
+
+    @NotNull
     private String rg;
+
+    @NotNull
     private String rgEmissor;
+
+    @NotNull
     private AcademicTitle academicTitle;
+
+    @NotNull
+    private AddressRequestDTO address;
+
+    @NotNull
+    private BankDataRequestDTO bankData;
 }

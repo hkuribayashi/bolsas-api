@@ -2,8 +2,8 @@ package org.isaci.bolsas_api.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.isaci.bolsas_api.dtos.ProjectDTO;
-import org.isaci.bolsas_api.dtos.ProjectResponseDTO;
+import org.isaci.bolsas_api.dto.request.ProjectRequestDTO;
+import org.isaci.bolsas_api.dto.response.ProjectResponseDTO;
 import org.isaci.bolsas_api.exceptions.ResourceNotFoundException;
 import org.isaci.bolsas_api.model.ProjectModel;
 import org.isaci.bolsas_api.repository.ProjectRepository;
@@ -24,8 +24,9 @@ public class ProjectService {
     /**
      * Cria e salva um novo projeto.
      */
-    public ProjectResponseDTO save(ProjectDTO projectDTO) {
+    public ProjectResponseDTO save(ProjectRequestDTO projectDTO) {
         ProjectModel project = modelMapper.map(projectDTO, ProjectModel.class);
+        project.setIsActive(true);
         ProjectModel saved = projectRepository.save(project);
         return modelMapper.map(saved, ProjectResponseDTO.class);
     }
@@ -34,7 +35,7 @@ public class ProjectService {
      * Atualiza um projeto existente pelo ID.
      */
     @Transactional
-    public ProjectResponseDTO update(UUID id, ProjectDTO projectDTO) {
+    public ProjectResponseDTO update(UUID id, ProjectRequestDTO projectDTO) {
         ProjectModel existing = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with id: " + id));
 

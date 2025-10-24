@@ -1,4 +1,4 @@
-package org.isaci.bolsas_api.dtos;
+package org.isaci.bolsas_api.dto.request;
 
 import lombok.Data;
 import jakarta.validation.constraints.NotNull;
@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 
 @Data
-public class ProjectDTO {
+public class ProjectRequestDTO {
 
     @NotNull
     private String name;
@@ -18,8 +18,5 @@ public class ProjectDTO {
     private Date startDate;
 
     private Date endDate;
-
-    @NotNull
-    private Boolean isActive;
 
 }

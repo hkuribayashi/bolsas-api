@@ -1,4 +1,4 @@
-package org.isaci.bolsas_api.dtos;
+package org.isaci.bolsas_api.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PersonReportDTO {
+public class PersonReportResponseDTO {
     private String nome;
     private String cpf;
     private String rg;

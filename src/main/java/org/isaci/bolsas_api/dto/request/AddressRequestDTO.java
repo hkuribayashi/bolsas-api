@@ -1,10 +1,10 @@
-package org.isaci.bolsas_api.dtos;
+package org.isaci.bolsas_api.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class AddressDTO {
+public class AddressRequestDTO {
 
     @NotNull
     private String street;
@@ -25,4 +25,6 @@ public class AddressDTO {
     private Integer number;
 
     private String complement;
+
+    private String neighborhood;
 }

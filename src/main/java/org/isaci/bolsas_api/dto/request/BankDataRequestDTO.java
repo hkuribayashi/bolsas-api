@@ -1,4 +1,4 @@
-package org.isaci.bolsas_api.dtos;
+package org.isaci.bolsas_api.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,7 +7,7 @@ import lombok.Data;
 import org.isaci.bolsas_api.enums.PixKey;
 
 @Data
-public class BankDataDTO {
+public class BankDataRequestDTO {
 
     @NotNull
     private String bankName;

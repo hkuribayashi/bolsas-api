@@ -2,14 +2,14 @@ package org.isaci.bolsas_api.enums;
 
 public enum AcademicTitle {
 
-    HIGH_SCHOOL("High School"),
-    TECHNICIAN("Technician"),
-    UNDERGRADUATE("Undergraduate"),
-    BACHELOR("Bachelor"),
-    SPECIALIST("Specialist"),
-    MASTER("Master"),
-    DOCTOR("Doctor"),
-    POST_DOCTOR("Postdoctoral"),
+    HIGH_SCHOOL("Ensino Médio"),
+    TECHNICIAN("Técnico"),
+    UNDERGRADUATE("Graduação"),
+    BACHELOR("Bacharel"),
+    SPECIALIST("Especialista"),
+    MASTER("Mestre"),
+    DOCTOR("Doutor"),
+    POST_DOCTOR("Pós-Doutor"),
     PROFESSOR("Professor");
 
     private final String description;

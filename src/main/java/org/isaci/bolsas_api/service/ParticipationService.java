@@ -2,8 +2,8 @@ package org.isaci.bolsas_api.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.isaci.bolsas_api.dtos.ParticipationDTO;
-import org.isaci.bolsas_api.dtos.ParticipationResponseDTO;
+import org.isaci.bolsas_api.dto.request.ParticipationRequestDTO;
+import org.isaci.bolsas_api.dto.response.ParticipationResponseDTO;
 import org.isaci.bolsas_api.exceptions.ResourceNotFoundException;
 import org.isaci.bolsas_api.model.ParticipationModel;
 import org.isaci.bolsas_api.model.PersonModel;
@@ -29,7 +29,7 @@ public class ParticipationService {
      * Cria uma participação.
      */
     @Transactional
-    public ParticipationResponseDTO save(ParticipationDTO dto) {
+    public ParticipationResponseDTO save(ParticipationRequestDTO dto) {
         PersonModel person = personRepository.findById(dto.getPersonId())
                 .orElseThrow(() -> new ResourceNotFoundException("Person not found with id: " + dto.getPersonId()));
 
@@ -54,7 +54,7 @@ public class ParticipationService {
      * Atualiza uma participação existente.
      */
     @Transactional
-    public ParticipationResponseDTO update(UUID id, ParticipationDTO dto) {
+    public ParticipationResponseDTO update(UUID id, ParticipationRequestDTO dto) {
         ParticipationModel existing = participationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Participation not found with id: " + id));
 
