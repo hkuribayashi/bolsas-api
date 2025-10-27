@@ -20,7 +20,7 @@ public class BankDataModel {
     @Column(length = 4, nullable = false)
     private String agencyNumber;
 
-    @Column(length = 1, nullable = true)
+    @Column(length = 1)
     private String agencyDV;
 
     @Column(nullable = false)

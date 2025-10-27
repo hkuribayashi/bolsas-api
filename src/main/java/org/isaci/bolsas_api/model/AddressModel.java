@@ -32,7 +32,7 @@ public class AddressModel {
     @Column(nullable = false)
     private Integer number;
 
-    @Column(nullable = true)
+    @Column
     private String complement;
 
     @Column(nullable = false)

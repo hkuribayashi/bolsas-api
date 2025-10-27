@@ -5,7 +5,6 @@ public enum AcademicTitle {
     HIGH_SCHOOL("Ensino Médio"),
     TECHNICIAN("Técnico"),
     UNDERGRADUATE("Graduação"),
-    BACHELOR("Bacharel"),
     SPECIALIST("Especialista"),
     MASTER("Mestre"),
     DOCTOR("Doutor"),

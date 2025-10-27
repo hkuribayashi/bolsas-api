@@ -25,7 +25,7 @@ public class ProjectModel {
     @Column(nullable = false)
     private Date startDate;
 
-    @Column(nullable = true)
+    @Column
     private Date endDate;
 
     @Column(nullable = false)

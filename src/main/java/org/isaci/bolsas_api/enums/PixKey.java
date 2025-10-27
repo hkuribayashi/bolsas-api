@@ -2,8 +2,18 @@ package org.isaci.bolsas_api.enums;
 
 public enum PixKey {
 
-    TELEPHONE,
-    EMAIL,
-    CPF_CNPJ,
-    RANDOM
+    TELEPHONE("telefone"),
+    EMAIL("email"),
+    CPF_CNPJ("cpf_cnpj"),
+    RANDOM("aleatória");
+
+    private final String description;
+
+    PixKey(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 }

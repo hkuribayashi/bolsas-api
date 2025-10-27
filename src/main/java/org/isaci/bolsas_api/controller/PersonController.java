@@ -23,7 +23,7 @@ public class PersonController {
     private final PersonService personService;
 
     /**
-     * Cria uma nova pessoa.
+     * Cria uma pessoa.
      */
     @PostMapping
     public ResponseEntity<PersonResponseDTO> createPerson(@RequestBody @Valid PersonRequestDTO personDTO) {
@@ -32,7 +32,7 @@ public class PersonController {
     }
 
     /**
-     * Retorna uma pessoa pelo ID.
+     * Retorna uma pessoa pelo ‘ID’.
      */
     @GetMapping("/{id}")
     public ResponseEntity<PersonResponseDTO> getPersonById(@PathVariable UUID id) {
@@ -61,7 +61,7 @@ public class PersonController {
     }
 
     /**
-     * Exclui uma pessoa pelo ID.
+     * Exclui uma pessoa pelo ‘ID’.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePerson(@PathVariable UUID id) {

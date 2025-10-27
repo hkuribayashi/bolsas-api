@@ -32,7 +32,7 @@ public class ProjectController {
     }
 
     /**
-     * Retorna um projeto pelo ID.
+     * Retorna um projeto pelo ‘ID’.
      */
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponseDTO> getProjectById(@PathVariable UUID id) {
@@ -61,7 +61,7 @@ public class ProjectController {
     }
 
     /**
-     * Exclui um projeto pelo ID.
+     * Exclui um projeto pelo ‘ID’.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProject(@PathVariable UUID id) {

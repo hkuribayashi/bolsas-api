@@ -2,11 +2,10 @@ package org.isaci.bolsas_api.enums;
 
 public enum ProjectRole {
 
-    COORDINATOR("Coordinator"),
-    FELLOW("Fellow"),
-    COLLABORATOR("Collaborator"),
-    ADVISOR("Advisor"),
-    ASSISTANT("Assistant");
+    COORDINATOR("Coordenador"),
+    COLLABORATOR("Colaborador"),
+    ADVISOR("Orientador"),
+    RESEARCHER("Pesquisador");
 
     private final String description;
 

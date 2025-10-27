@@ -3,12 +3,12 @@ package org.isaci.bolsas_api.enums;
 
 public enum MaritalStatus {
 
-    SINGLE("Single"),
-    MARRIED("Married"),
-    SEPARATED("Separated"),
-    DIVORCED("Divorced"),
-    WIDOWED("Widowed"),
-    COMMON_LAW_MARRIAGE("Common-law Marriage");
+    SINGLE("Solteiro"),
+    MARRIED("Casado"),
+    SEPARATED("Separado"),
+    DIVORCED("Divorciado"),
+    WIDOWED("Viúvo"),
+    COMMON_LAW_MARRIAGE("União Estável");
 
     private final String description;
 
