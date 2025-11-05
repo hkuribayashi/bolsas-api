@@ -13,6 +13,12 @@ RUN mvn clean package -DskipTests
 # =========================
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
+
+# ✅ Instala netcat e cliente do PostgreSQL (psql)
+RUN apt-get update && \
+    apt-get install -y netcat postgresql-client && \
+    rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
