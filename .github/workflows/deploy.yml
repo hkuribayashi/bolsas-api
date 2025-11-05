@@ -3,7 +3,7 @@ name: Build & Deploy - bolsas-api
 on:
   push:
     branches:
-      - master
+      - main
 
 env:
   # Caminho da imagem no GitHub Container Registry
