@@ -8,7 +8,6 @@ services:
     env_file:
       - .env
     environment:
-      # Valores padrão de fallback (usados se variáveis não existirem)
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-isaciBolsasAPI}
