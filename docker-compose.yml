@@ -1,4 +1,8 @@
 
+networks:
+  bolsas-net:
+    driver: bridge
+
 services:
   db:
     image: postgres:15.3
@@ -20,6 +24,8 @@ services:
       timeout: 10s
       retries: 20
       start_period: 30s
+    networks:
+      - bolsas-net
 
   bolsas-api:
     image: ghcr.io/hkuribayashi/bolsas-api:latest
@@ -34,3 +40,5 @@ services:
       - .env
     environment:
       SPRING_PROFILES_ACTIVE: prod
+    networks:
+      - bolsas-net
