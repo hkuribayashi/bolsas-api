@@ -6,7 +6,6 @@ on:
       - main
 
 env:
-  # Caminho da imagem no GitHub Container Registry
   DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
 
 jobs:
@@ -14,19 +13,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Clona o código do repositório
+      # 1️⃣ Clona o código
       - name: Checkout código
         uses: actions/checkout@v4
 
-      # 2️⃣ Build da imagem Docker multi-stage (Maven + JDK 17)
+      # 2️⃣ Build multi-stage (Maven + JDK 17)
       - name: Build imagem Docker multi-stage
         run: docker build -t $DOCKER_IMAGE .
 
-      # 3️⃣ Login no GitHub Container Registry (ghcr.io)
+      # 3️⃣ Login no GitHub Container Registry
       - name: Login no GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      # 4️⃣ Envia a imagem buildada para o GHCR
+      # 4️⃣ Push da imagem
       - name: Push imagem Docker
         run: docker push $DOCKER_IMAGE
 
@@ -35,7 +34,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 5️⃣ Copia o docker-compose.yml e o .env para o servidor Debian Trixie
+      # 5️⃣ Clona o código novamente (cada job é isolado)
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # 6️⃣ Gera o arquivo .env dinamicamente
+      - name: Gerar arquivo .env para o deploy
+        run: |
+          echo "# API Key" > .env
+          echo "SECURITY_API_KEY=${{ secrets.SECURITY_API_KEY }}" >> .env
+          echo "" >> .env
+          echo "# Banco de dados (em Docker)" >> .env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "" >> .env
+          echo "# Configuração de conexão do Spring Boot" >> .env
+          echo "SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/${{ secrets.POSTGRES_DB }}" >> .env
+          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+
+      # 7️⃣ Lista os arquivos para depuração (sem mostrar segredos)
+      - name: Verificar conteúdo do workspace
+        run: |
+          echo "📂 Conteúdo atual:"
+          ls -la
+          echo ""
+          echo "✅ Arquivo .env gerado (sem exibir segredos):"
+          cat .env | sed -E 's/(=).*/=\[REDACTED\]/'
+
+      # 8️⃣ Copia arquivos para o servidor remoto
       - name: Copiar arquivos para o servidor remoto
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -47,34 +75,10 @@ jobs:
             .env
           target: /srv/bolsas-api
 
-      # 6️⃣ Faz o deploy remoto via SSH (reinicia containers)
+      # 9️⃣ Executa o deploy remoto (docker compose)
       - name: Deploy remoto no servidor Debian Trixie
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script_stop: true
-          options: "-o StrictHostKeyChecking=no"
-          script: |
-            set -e
-
-            echo "📦 Atualizando aplicação no servidor Debian Trixie..."
-            cd /srv/bolsas-api
-
-            # Faz login no GHCR
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-            # Puxa a versão mais recente da imagem
-            docker pull $DOCKER_IMAGE
-
-            # Para containers antigos
-            docker compose down
-
-            # Sobe novamente (modo daemon)
-            docker compose up -d --remove-orphans
-
-            # Limpa imagens antigas
-            docker image prune -f
-
-            echo "✅ Deploy concluído com sucesso no servidor Debian Trixie!"
+          key: ${{ secre

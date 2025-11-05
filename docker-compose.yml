@@ -5,12 +5,15 @@ services:
     image: postgres:15.3
     container_name: bolsas-db
     restart: always
+    env_file:
+      - .env
     environment:
+      # Valores padrão de fallback (usados se variáveis não existirem)
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-isaciBolsasAPI}
     ports:
-      - "5432:5432"  # opcional; deixe se você acessa o DB externamente (psql/IDE)
+      - "5432:5432"
     volumes:
       - ./data:/var/lib/postgresql/data
     healthcheck:
@@ -20,8 +23,6 @@ services:
       retries: 10
 
   bolsas-api:
-    # Se você usa CI para publicar a imagem no GHCR, mantenha 'image:'.
-    # Se quiser buildar localmente, troque por 'build: .' e remova o 'image:'.
     image: ghcr.io/hkuribayashi/bolsas-api:latest
     container_name: bolsas-api
     restart: always
@@ -30,9 +31,7 @@ services:
         condition: service_healthy
     ports:
       - "8080:8080"
-    # Injeta todas as variáveis do seu arquivo .env para a aplicação
     env_file:
       - .env
     environment:
-      # Garante que o Spring use application-prod.yml (url = jdbc://db:5432/…)
       SPRING_PROFILES_ACTIVE: prod
