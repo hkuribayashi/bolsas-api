@@ -1,27 +1,38 @@
 version: '3.9'
 
 services:
+  db:
+    image: postgres:15.3
+    container_name: bolsas-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-isaciBolsasAPI}
+    ports:
+      - "5432:5432"  # opcional; deixe se você acessa o DB externamente (psql/IDE)
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   bolsas-api:
-    build: .
+    # Se você usa CI para publicar a imagem no GHCR, mantenha 'image:'.
+    # Se quiser buildar localmente, troque por 'build: .' e remova o 'image:'.
+    image: ghcr.io/hkuribayashi/bolsas-api:latest
     container_name: bolsas-api
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "8080:8080"
-    depends_on:
-      - db
+    # Injeta todas as variáveis do seu arquivo .env para a aplicação
     env_file:
       - .env
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-    restart: always
-
-  db:
-    image: postgres:15.3
-    restart: always
-    environment:
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: isaciBolsasAPI
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./data:/var/lib/postgresql/data
+      # Garante que o Spring use application-prod.yml (url = jdbc://db:5432/…)
+      SPRING_PROFILES_ACTIVE: prod
