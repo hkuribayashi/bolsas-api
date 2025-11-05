@@ -1,4 +1,4 @@
-name: Build & Deploy - bolsas-api
+name: Build & Deploy - bolsas-api (debug)
 
 on:
   push:
@@ -6,7 +6,6 @@ on:
       - main
 
 env:
-  # Caminho da imagem no GitHub Container Registry
   DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
 
 jobs:
@@ -14,19 +13,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Clona o código do repositório
       - name: Checkout código
         uses: actions/checkout@v4
 
-      # 2️⃣ Build da imagem Docker multi-stage (Maven + JDK 17)
       - name: Build imagem Docker multi-stage
         run: docker build -t $DOCKER_IMAGE .
 
-      # 3️⃣ Login no GitHub Container Registry (ghcr.io)
       - name: Login no GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      # 4️⃣ Envia a imagem buildada para o GHCR
       - name: Push imagem Docker
         run: docker push $DOCKER_IMAGE
 
@@ -35,11 +30,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 5️⃣ Clona o código novamente (cada job é isolado)
       - name: Checkout código
         uses: actions/checkout@v4
 
-      # 6️⃣ Gera o arquivo .env dinamicamente a partir dos secrets
+      # 🔹 Etapa de diagnóstico: confirmar secrets recebidos
+      - name: Verificar secrets disponíveis (apenas nomes, sem valores)
+        run: |
+          echo "✅ Secrets configurados:"
+          echo "- SERVER_HOST: ${{ secrets.SERVER_HOST && '✅ definido' || '❌ ausente' }}"
+          echo "- SERVER_USER: ${{ secrets.SERVER_USER && '✅ definido' || '❌ ausente' }}"
+          echo "- SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY && '✅ definido' || '❌ ausente' }}"
+          echo "- SECURITY_API_KEY: ${{ secrets.SECURITY_API_KEY && '✅ definido' || '❌ ausente' }}"
+          echo "- POSTGRES_USER: ${{ secrets.POSTGRES_USER && '✅ definido' || '❌ ausente' }}"
+          echo "- POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD && '✅ definido' || '❌ ausente' }}"
+          echo "- POSTGRES_DB: ${{ secrets.POSTGRES_DB && '✅ definido' || '❌ ausente' }}"
+
+      # 🔹 Gera o .env a partir dos secrets
       - name: Gerar arquivo .env para o deploy
         env:
           SECURITY_API_KEY: ${{ secrets.SECURITY_API_KEY }}
@@ -60,16 +66,37 @@ jobs:
           echo "SPRING_DATASOURCE_USERNAME=$POSTGRES_USER" >> .env
           echo "SPRING_DATASOURCE_PASSWORD=$POSTGRES_PASSWORD" >> .env
 
-      # 7️⃣ Lista arquivos para depuração (sem exibir segredos)
-      - name: Verificar conteúdo do workspace
+      # 🔹 Confirma que o .env foi criado corretamente
+      - name: Verificar se .env foi gerado
         run: |
-          echo "📂 Conteúdo atual:"
+          echo "📂 Listando arquivos atuais:"
           ls -la
           echo ""
-          echo "✅ Arquivo .env gerado (sem exibir segredos):"
+          if [ ! -f .env ]; then
+            echo "❌ ERRO: .env não foi criado!"
+            exit 1
+          fi
+          echo "✅ .env encontrado!"
+          echo ""
+          echo "Conteúdo (com valores mascarados):"
           cat .env | sed -E 's/(=).*/=\[REDACTED\]/'
 
-      # 8️⃣ Copia arquivos para o servidor remoto
+      # 🔹 Verifica se docker-compose.yml existe
+      - name: Verificar docker-compose.yml
+        run: |
+          if [ ! -f docker-compose.yml ]; then
+            echo "❌ ERRO: docker-compose.yml não encontrado!"
+            exit 1
+          fi
+          echo "✅ docker-compose.yml encontrado com sucesso."
+
+      # 🔹 Lista tudo novamente antes do SCP
+      - name: Verificar arquivos antes da cópia
+        run: |
+          echo "📂 Verificando novamente antes do deploy:"
+          ls -la
+
+      # 🔹 Copia arquivos para o servidor remoto
       - name: Copiar arquivos para o servidor remoto
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -80,8 +107,9 @@ jobs:
             docker-compose.yml
             .env
           target: /srv/bolsas-api
+          debug: true
 
-      # 9️⃣ Faz o deploy remoto via SSH (reinicia containers)
+      # 🔹 Executa o deploy remoto (compose up)
       - name: Deploy remoto no servidor Debian Trixie
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -92,23 +120,14 @@ jobs:
           options: "-o StrictHostKeyChecking=no"
           script: |
             set -e
-
             echo "📦 Atualizando aplicação no servidor Debian Trixie..."
             cd /srv/bolsas-api
 
-            # Faz login no GHCR
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-            # Puxa a versão mais recente da imagem
             docker pull $DOCKER_IMAGE
-
-            # Para containers antigos
             docker compose down
-
-            # Sobe novamente (modo daemon)
             docker compose up -d --remove-orphans
-
-            # Limpa imagens antigas
             docker image prune -f
 
             echo "✅ Deploy concluído com sucesso no servidor Debian Trixie!"
