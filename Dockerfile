@@ -16,7 +16,7 @@ WORKDIR /app
 
 # ✅ Instala netcat e cliente do PostgreSQL (psql)
 RUN apt-get update && \
-    apt-get install -y netcat postgresql-client && \
+    apt-get install -y postgresql-client && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /app/target/*.jar app.jar
