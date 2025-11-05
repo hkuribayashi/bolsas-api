@@ -1,6 +1,4 @@
-networks:
-  bolsas-net:
-    driver: bridge
+version: '3.9'
 
 services:
   db:
@@ -17,14 +15,18 @@ services:
       - "5432:5432"
     volumes:
       - ./data:/var/lib/postgresql/data
+    command: >
+      bash -c "
+        echo \"listen_addresses='*'\" >> /var/lib/postgresql/data/postgresql.conf &&
+        echo \"host all all all scram-sha-256\" >> /var/lib/postgresql/data/pg_hba.conf &&
+        exec docker-entrypoint.sh postgres
+      "
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} || exit 1"]
       interval: 5s
       timeout: 10s
       retries: 20
       start_period: 30s
-    networks:
-      - bolsas-net
 
   bolsas-api:
     image: ghcr.io/hkuribayashi/bolsas-api:latest
@@ -39,5 +41,8 @@ services:
       - .env
     environment:
       SPRING_PROFILES_ACTIVE: prod
-    networks:
-      - bolsas-net
+
+networks:
+  default:
+    name: bolsas-api_bolsas-net
+    driver: bridge
