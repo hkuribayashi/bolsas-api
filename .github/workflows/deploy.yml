@@ -1,3 +1,4 @@
+---
 name: CI/CD - Sensor API (Deploy via SSH + Deploy Key GitHub)
 
 on:
