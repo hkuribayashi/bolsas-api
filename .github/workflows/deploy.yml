@@ -1,131 +1,75 @@
-name: Build & Deploy - bolsas-api (debug)
+name: CI/CD - Sensor API (Deploy via SSH + Deploy Key GitHub)
 
 on:
   push:
     branches:
-      - main
-
-env:
-  DOCKER_IMAGE: ghcr.io/${{ github.repository }}:latest
+      - main  # dispara o deploy quando houver push na main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout código
-        uses: actions/checkout@v4
-
-      - name: Build imagem Docker multi-stage
-        run: docker build -t $DOCKER_IMAGE .
-
-      - name: Login no GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Push imagem Docker
-        run: docker push $DOCKER_IMAGE
-
   deploy:
-    needs: build
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout código
+      # 1️⃣ Checkout do repositório (necessário apenas para variáveis)
+      - name: Checkout do repositório
         uses: actions/checkout@v4
 
-      # 🔹 Etapa de diagnóstico: confirmar secrets recebidos
-      - name: Verificar secrets disponíveis (apenas nomes, sem valores)
-        run: |
-          echo "✅ Secrets configurados:"
-          echo "- SERVER_HOST: ${{ secrets.SERVER_HOST && '✅ definido' || '❌ ausente' }}"
-          echo "- SERVER_USER: ${{ secrets.SERVER_USER && '✅ definido' || '❌ ausente' }}"
-          echo "- SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY && '✅ definido' || '❌ ausente' }}"
-          echo "- SECURITY_API_KEY: ${{ secrets.SECURITY_API_KEY && '✅ definido' || '❌ ausente' }}"
-          echo "- POSTGRES_USER: ${{ secrets.POSTGRES_USER && '✅ definido' || '❌ ausente' }}"
-          echo "- POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD && '✅ definido' || '❌ ausente' }}"
-          echo "- POSTGRES_DB: ${{ secrets.POSTGRES_DB && '✅ definido' || '❌ ausente' }}"
-
-      # 🔹 Gera o .env a partir dos secrets
-      - name: Gerar arquivo .env para o deploy
-        env:
-          SECURITY_API_KEY: ${{ secrets.SECURITY_API_KEY }}
-          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-        run: |
-          echo "# API Key" > .env
-          echo "SECURITY_API_KEY=$SECURITY_API_KEY" >> .env
-          echo "" >> .env
-          echo "# Banco de dados (em Docker)" >> .env
-          echo "POSTGRES_USER=$POSTGRES_USER" >> .env
-          echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> .env
-          echo "POSTGRES_DB=$POSTGRES_DB" >> .env
-          echo "" >> .env
-          echo "# Configuração de conexão do Spring Boot" >> .env
-          echo "SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/$POSTGRES_DB" >> .env
-          echo "SPRING_DATASOURCE_USERNAME=$POSTGRES_USER" >> .env
-          echo "SPRING_DATASOURCE_PASSWORD=$POSTGRES_PASSWORD" >> .env
-
-      # 🔹 Confirma que o .env foi criado corretamente
-      - name: Verificar se .env foi gerado
-        run: |
-          echo "📂 Listando arquivos atuais:"
-          ls -la
-          echo ""
-          if [ ! -f .env ]; then
-            echo "❌ ERRO: .env não foi criado!"
-            exit 1
-          fi
-          echo "✅ .env encontrado!"
-          echo ""
-          echo "Conteúdo (com valores mascarados):"
-          cat .env | sed -E 's/(=).*/=\[REDACTED\]/'
-
-      # 🔹 Verifica se docker-compose.yml existe
-      - name: Verificar docker-compose.yml
-        run: |
-          if [ ! -f docker-compose.yml ]; then
-            echo "❌ ERRO: docker-compose.yml não encontrado!"
-            exit 1
-          fi
-          echo "✅ docker-compose.yml encontrado com sucesso."
-
-      # 🔹 Lista tudo novamente antes do SCP
-      - name: Verificar arquivos antes da cópia
-        run: |
-          echo "📂 Verificando novamente antes do deploy:"
-          ls -la
-
-      # 🔹 Copia arquivos para o servidor remoto
-      - name: Copiar arquivos para o servidor remoto
-        uses: appleboy/scp-action@v0.1.7
+      # 2️⃣ Deploy remoto via SSH
+      - name: Deploy remoto no servidor Debian
+        uses: appleboy/ssh-action@v1.1.0
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "docker-compose.yml,.env"
-          target: /srv/bolsas-api
-          debug: true
-
-      # 🔹 Executa o deploy remoto (compose up)
-      - name: Deploy remoto no servidor Debian Trixie
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script_stop: true
-          options: "-o StrictHostKeyChecking=no"
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
             set -e
-            echo "📦 Atualizando aplicação no servidor Debian Trixie..."
-            cd /srv/bolsas-api
+            echo "📦 Iniciando deploy no servidor remoto..."
 
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            PROJECT_PATH="/srv/sensor-api"
+            REPO_SSH="git@github.com:Monitoramento-Ambiental/sensor-api.git"
 
-            docker pull ${{ env.DOCKER_IMAGE }}
+            # Cria o diretório se não existir
+            if [ ! -d "$PROJECT_PATH" ]; then
+              echo "📁 Criando diretório do projeto em $PROJECT_PATH ..."
+              sudo mkdir -p $PROJECT_PATH
+              sudo chown -R $USER:$USER $PROJECT_PATH
+              sudo chmod 755 $PROJECT_PATH
+            fi
+
+            cd $PROJECT_PATH
+
+            # Verifica se é um repositório git válido
+            if [ ! -d ".git" ]; then
+              echo "🚀 Repositório não encontrado. Clonando via SSH (Deploy Key)..."
+              rm -rf $PROJECT_PATH/*
+              git clone $REPO_SSH $PROJECT_PATH
+              cd $PROJECT_PATH
+            fi
+
+            echo "🔄 Atualizando repositório..."
+            git fetch --all
+            git reset --hard origin/main
+
+            echo "⚙️ Atualizando arquivo .env..."
+            cat <<EOF > .env
+            MONGO_URI=${{ secrets.MONGO_URI }}
+            DATABASE=${{ secrets.DATABASE }}
+            SECRET_KEY=${{ secrets.SECRET_KEY }}
+            EOF
+  
+            echo "🐳 Subindo containers..."
+            set +e
             docker compose down
-            docker compose up -d --remove-orphans
-            docker image prune -f
-
-            echo "✅ Deploy concluído com sucesso no servidor Debian Trixie!"
+            docker compose up -d --build
+            STATUS=$?
+            set -e
+            
+            if [ $STATUS -ne 0 ]; then
+            echo "❌ Erro ao subir containers. Tentando rollback..."
+            git reset --hard HEAD~1 || true
+            docker compose down
+            docker compose up -d --build || true
+            echo "⚠️ Rollback executado para versão anterior."
+            else
+            echo "✅ Deploy concluído com sucesso!"
+            fi
