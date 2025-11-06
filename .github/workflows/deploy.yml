@@ -3,18 +3,16 @@ name: CI/CD - Sensor API (Deploy via SSH + Deploy Key GitHub)
 on:
   push:
     branches:
-      - main  # dispara o deploy quando houver push na main
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout do repositório (necessário apenas para variáveis)
       - name: Checkout do repositório
         uses: actions/checkout@v4
 
-      # 2️⃣ Deploy remoto via SSH
       - name: Deploy remoto no servidor Debian
         uses: appleboy/ssh-action@v1.1.0
         with:
@@ -23,14 +21,14 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           script: |
             set -e
-            echo "📦 Iniciando deploy no servidor remoto..."
+            echo "Iniciando deploy no servidor remoto..."
 
             PROJECT_PATH="/srv/sensor-api"
             REPO_SSH="git@github.com:Monitoramento-Ambiental/sensor-api.git"
 
             # Cria o diretório se não existir
             if [ ! -d "$PROJECT_PATH" ]; then
-              echo "📁 Criando diretório do projeto em $PROJECT_PATH ..."
+              echo "Criando diretório do projeto em $PROJECT_PATH ..."
               sudo mkdir -p $PROJECT_PATH
               sudo chown -R $USER:$USER $PROJECT_PATH
               sudo chmod 755 $PROJECT_PATH
@@ -40,24 +38,24 @@ jobs:
 
             # Verifica se é um repositório git válido
             if [ ! -d ".git" ]; then
-              echo "🚀 Repositório não encontrado. Clonando via SSH (Deploy Key)..."
+              echo "Repositório não encontrado. Clonando via SSH (Deploy Key)..."
               rm -rf $PROJECT_PATH/*
               git clone $REPO_SSH $PROJECT_PATH
               cd $PROJECT_PATH
             fi
 
-            echo "🔄 Atualizando repositório..."
+            echo "Atualizando repositório..."
             git fetch --all
             git reset --hard origin/main
 
-            echo "⚙️ Atualizando arquivo .env..."
+            echo "Atualizando arquivo .env..."
             cat <<EOF > .env
             MONGO_URI=${{ secrets.MONGO_URI }}
             DATABASE=${{ secrets.DATABASE }}
             SECRET_KEY=${{ secrets.SECRET_KEY }}
             EOF
-  
-            echo "🐳 Subindo containers..."
+            
+            echo "Subindo containers..."
             set +e
             docker compose down
             docker compose up -d --build
@@ -65,11 +63,11 @@ jobs:
             set -e
             
             if [ $STATUS -ne 0 ]; then
-            echo "❌ Erro ao subir containers. Tentando rollback..."
+            echo "Erro ao subir containers. Tentando rollback..."
             git reset --hard HEAD~1 || true
             docker compose down
             docker compose up -d --build || true
-            echo "⚠️ Rollback executado para versão anterior."
+            echo "Rollback executado para versão anterior."
             else
-            echo "✅ Deploy concluído com sucesso!"
+            echo "Deploy concluído com sucesso."
             fi
